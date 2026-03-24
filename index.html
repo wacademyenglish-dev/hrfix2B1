@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wolf Labs | HR Homework 01 (B1)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0073C0',     /* Corporate Blue */
+                        primaryHover: '#005A99',
+                        gold: '#D4AF37',        /* Elegant Gold */
+                        base: '#060B14',        /* Dark Navy Background */
+                        surface: '#0F172A',     /* Surface Panel */
+                        surfaceHover: '#1E293B',
+                        subtext: '#94A3B8',     /* Slate */
+                        error: '#E50914'
+                    },
+                    fontFamily: {
+                        header: ['Montserrat', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html, body {
+            background-color: #060B14;
+            color: #FFFFFF;
+            overflow: hidden;
+            overscroll-behavior-y: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Mobile App Container */
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: linear-gradient(135deg, #060B14 0%, #0B1221 100%);
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        /* Ambient Background Orbs */
+        .bg-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: 0;
+            pointer-events: none;
+            animation: float 20s infinite ease-in-out alternate;
+        }
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(20px, -30px) scale(1.1); }
+        }
+
+        /* Progress Bar */
+        .progress-track { background: #1E293B; height: 12px; border-radius: 999px; overflow: hidden; flex-grow: 1; border: 1px solid rgba(255,255,255,0.05); }
+        .progress-fill { background: linear-gradient(90deg, #D4AF37, #FDE047); height: 100%; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 999px; box-shadow: 0 0 10px rgba(212,175,55,0.5); }
+
+        /* General UI Elements */
+        .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+        
+        /* Buttons */
+        .btn-gold {
+            background: linear-gradient(135deg, #D4AF37 0%, #B49020 100%); color: #060B14; border-radius: 16px; font-weight: 900; font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; box-shadow: 0 4px 0 #8B6B10; border: none;
+        }
+        .btn-gold:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
+        .btn-gold:disabled { background: #1E293B; color: #94A3B8; box-shadow: 0 4px 0 #0F172A; cursor: not-allowed; }
+
+        .btn-secondary {
+            background-color: transparent; color: #FFFFFF; border: 2px solid #94A3B8; border-radius: 16px; font-weight: 800; font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; box-shadow: 0 4px 0 #1E293B;
+        }
+        .btn-secondary:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
+
+        /* Option Selection */
+        .opt-btn {
+            background: #1E293B; border: 2px solid rgba(212,175,55,0.1); border-radius: 16px; padding: 20px; font-weight: 600; text-align: left;
+            transition: all 0.2s; color: #fff; display: flex; align-items: center; gap: 16px;
+        }
+        .opt-btn.selected { border-color: #D4AF37; background: rgba(212, 175, 55, 0.15); color: #D4AF37; box-shadow: 0 0 15px rgba(212,175,55,0.1); }
+
+        .opt-circle {
+            width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(212,175,55,0.4); display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0;
+        }
+        .opt-btn.selected .opt-circle { border-color: #D4AF37; background: #D4AF37; }
+
+        /* Word Builder */
+        .word-chip {
+            background: #1E293B; border: 1px solid rgba(212,175,55,0.2); border-radius: 12px; padding: 12px 20px; font-weight: 600; font-size: 1.1rem;
+            cursor: pointer; box-shadow: 0 4px 0 #0F172A; transition: transform 0.1s, box-shadow 0.1s; color: #F8FAFC;
+        }
+        .word-chip:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
+        .word-chip.selected { background: rgba(212, 175, 55, 0.15); border-color: #D4AF37; color: #D4AF37; box-shadow: 0 4px 0 #8B6B10; }
+
+        .drop-zone { min-height: 80px; border: 2px dashed rgba(212,175,55,0.3); border-radius: 16px; display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; margin-bottom: 24px; align-items: center; justify-content: center; background: #060B14;}
+
+        /* Bug Hunter Selection */
+        .bh-word { cursor: pointer; transition: all 0.2s; border-bottom: 2px dashed #334155; padding-bottom: 2px; }
+        .bh-word.selected { color: #D4AF37; border-bottom-color: #D4AF37; background: rgba(212,175,55,0.1); border-radius: 4px; padding: 0 4px; }
+
+        /* Animations */
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+        .animate-shake { animation: shake 0.4s ease-in-out; }
+
+        /* Hide Scrollbar */
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .watermark-icon {
+            position: absolute; right: -5%; bottom: -15%; font-size: 150px; color: rgba(255, 255, 255, 0.02); pointer-events: none; z-index: 0; transform: rotate(-15deg);
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <!-- Ambient Background Orbs -->
+    <div class="bg-orb w-[300px] h-[300px] bg-primary/20 top-[-10%] left-[-10%]"></div>
+    <div class="bg-orb w-[400px] h-[400px] bg-gold/10 bottom-[-10%] right-[-20%]" style="animation-delay: -5s;"></div>
+
+    <!-- 1. COVER SCREEN -->
+    <div id="cover-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center text-center px-6 transition-opacity duration-500 bg-[#060B14]/90 backdrop-blur-md">
+        <div class="w-32 h-32 rounded-full bg-surface flex items-center justify-center shadow-[0_15px_40px_rgba(212,175,55,0.2)] border border-gold/30 relative group mb-8">
+            <div class="absolute inset-0 rounded-full bg-gold opacity-10 animate-pulse"></div>
+            <i class="fa-solid fa-users-viewfinder text-5xl text-gold relative z-10"></i>
+        </div>
+        <h2 class="text-xs font-header text-gold font-bold tracking-[0.3em] mb-3 uppercase"><i class="fa-solid fa-bolt mr-2"></i>Homework HR 01</h2>
+        <h1 class="text-4xl font-header font-black text-white mb-4 tracking-tight leading-tight">Strategic Recruitment (B1)</h1>
+        <p class="text-base text-subtext font-body font-medium leading-relaxed mb-12">Complete 20 advanced challenges focusing on Second Conditional and Character Analysis.</p>
+        
+        <div class="w-full mt-auto mb-8 flex flex-col gap-4">
+            <div class="flex justify-center gap-3 mb-4">
+                <span class="px-3 py-1 rounded-full bg-black/50 border border-white/10 text-[10px] font-bold text-white/70 uppercase tracking-widest"><i class="fa-solid fa-heart text-error mr-1"></i> 5 Hearts</span>
+                <span class="px-3 py-1 rounded-full bg-black/50 border border-white/10 text-[10px] font-bold text-white/70 uppercase tracking-widest"><i class="fa-solid fa-bolt text-gold mr-1"></i> +300 XP</span>
+            </div>
+            <button class="btn-gold w-full py-4 text-lg" onclick="startHomework()">START MISSION</button>
+        </div>
+    </div>
+
+    <!-- 2. MAIN GAME UI -->
+    <div id="game-ui" class="hidden flex-col h-full w-full relative z-10">
+        <!-- Top Header (Progress & Hearts) -->
+        <header class="flex items-center gap-4 px-6 pt-8 pb-4 bg-transparent">
+            <button onclick="location.reload()" class="text-subtext hover:text-gold text-xl p-2 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+            <div class="progress-track">
+                <div id="progress-bar" class="progress-fill" style="width: 0%;"></div>
+            </div>
+            <div id="hearts-container" class="flex gap-1 text-error text-xl ml-2 drop-shadow-md">
+                <!-- Hearts injected by JS -->
+            </div>
+        </header>
+
+        <!-- Main Exercise Area -->
+        <main class="flex-grow flex flex-col px-6 py-4 overflow-y-auto scrollbar-hide relative" id="exercise-content">
+            <!-- Exercise injected here -->
+        </main>
+
+        <!-- Footer Area (Check Button) -->
+        <footer class="px-6 pb-8 pt-4 bg-transparent border-t border-white/5 relative">
+            <button id="check-btn" class="btn-gold w-full py-4 text-lg" onclick="checkAnswer()" disabled>VERIFY STRATEGY</button>
+        </footer>
+    </div>
+
+    <!-- 3. VICTORY SCREEN -->
+    <div id="victory-screen" class="absolute inset-0 z-50 hidden flex-col items-center justify-center text-center px-6 bg-[#060B14]/95 backdrop-blur-md">
+        <div class="w-32 h-32 rounded-full bg-[rgba(212,175,55,0.1)] border border-gold/30 flex items-center justify-center mb-6 relative shadow-[0_0_50px_rgba(212,175,55,0.2)]">
+            <div class="absolute inset-0 rounded-full border-2 border-gold/50 animate-ping"></div>
+            <i class="fa-solid fa-crown text-6xl text-gold"></i>
+        </div>
+        <h1 class="text-4xl font-header font-black text-white mb-2 tracking-tight">Mission Cleared!</h1>
+        <p class="text-lg text-subtext mb-8 font-medium">B1 Recruitment concepts successfully installed.</p>
+        
+        <div class="glass-panel p-6 w-full mb-10 border-l-4 border-gold">
+            <p class="text-[10px] text-subtext mb-4 font-bold uppercase tracking-widest flex items-center justify-center"><i class="fa-solid fa-chart-pie mr-2 text-gold"></i> Rewards Earned</p>
+            <div class="flex justify-between items-center border-b border-white/10 pb-4 mb-4">
+                <span class="text-base font-bold text-white">Strategic Fluency (XP)</span> 
+                <span class="text-2xl font-header font-black text-gold">+300</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-base font-bold text-white">Hearts Left</span> 
+                <span class="text-2xl font-header font-black text-error" id="final-hearts">5</span>
+            </div>
+        </div>
+        
+        <div class="w-full flex flex-col gap-4 mt-auto mb-8">
+            <button class="btn-secondary w-full py-4 text-sm flex items-center justify-center gap-2 bg-[#0F172A] hover:text-gold hover:border-gold" onclick="openVideoModal()">
+                <i class="fa-brands fa-youtube text-[#E50914] text-lg"></i> REVIEW SINEK'S TALK
+            </button>
+            <button class="btn-gold w-full py-4 text-lg" onclick="location.reload()">FINISH</button>
+        </div>
+    </div>
+
+    <!-- 4. BOTTOM SHEET FEEDBACK -->
+    <div id="sheet-backdrop" class="absolute inset-0 bg-black/60 z-40 hidden opacity-0 transition-opacity"></div>
+    <div id="bottom-sheet" class="absolute bottom-0 left-0 w-full rounded-t-3xl p-6 pb-10 z-50 transform translate-y-full flex flex-col gap-6 transition-transform duration-300">
+        <div class="flex justify-between items-center">
+            <h2 id="sheet-title" class="text-2xl font-header font-black tracking-tight"></h2>
+            <div id="sheet-icon" class="text-4xl"></div>
+        </div>
+        <div id="sheet-msg-container" class="hidden">
+            <p class="text-sm font-bold uppercase tracking-widest opacity-60 mb-1">Correct Strategy:</p>
+            <p id="sheet-msg" class="text-lg font-bold"></p>
+        </div>
+        <button id="continue-btn" class="w-full py-4 rounded-xl font-header font-bold text-lg uppercase tracking-wider shadow-[0_4px_0_rgba(0,0,0,0.3)] active:translate-y-1 active:shadow-none transition-all border-none" onclick="nextExercise()">CONTINUE</button>
+    </div>
+
+    <!-- 5. GAME OVER MODAL -->
+    <div id="game-over-modal" class="absolute inset-0 bg-[#060B14]/95 backdrop-blur-md z-[60] hidden flex-col items-center justify-center text-center px-6">
+        <div class="w-32 h-32 rounded-full flex items-center justify-center text-6xl mb-8 bg-[#E50914]/10 text-[#E50914] border border-[#E50914]/30">
+            <i class="fa-solid fa-heart-crack"></i>
+        </div>
+        <h1 class="text-4xl font-header font-black mb-4 tracking-tight">Out of Hearts!</h1>
+        <p class="text-lg text-subtext mb-12 font-medium leading-relaxed">Mistakes help us learn. Take a deep breath and try the strategy again.</p>
+        <button class="w-full py-4 text-lg font-header font-bold rounded-2xl uppercase tracking-wider bg-[#E50914] text-white shadow-[0_4px_0_#b9000b] active:translate-y-1 active:shadow-none transition-all mt-auto mb-8 border-none" onclick="location.reload()">TRY AGAIN</button>
+    </div>
+
+    <!-- 6. DOSSIER MODAL (Review Text) -->
+    <div id="dossier-modal" class="absolute inset-0 z-[70] hidden bg-[#060B14]/95 flex-col px-4 py-8 overflow-y-auto backdrop-blur-md">
+        <div class="flex justify-between items-center mb-6 max-w-3xl mx-auto w-full mt-4">
+            <h2 class="text-sm font-header text-gold font-bold uppercase tracking-widest"><i class="fa-solid fa-folder-open mr-2"></i> Company Culture Dossiers</h2>
+            <button onclick="closeDossierModal()" class="text-white hover:text-gold text-4xl transition-colors"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="max-w-3xl mx-auto w-full flex flex-col gap-4">
+            <div class="glass-panel p-6 flex flex-col md:flex-row items-center gap-6 border-l-4 border-primary">
+                <i class="fa-solid fa-building text-4xl text-primary w-12 text-center"></i>
+                <div class="text-center md:text-left">
+                    <h3 class="font-bold text-white text-xl mb-1">The Traditional Corp.</h3>
+                    <p class="text-subtext text-base">They only look at <b>past performance</b> and <b>skills</b>. They hire people who are <b>great on paper</b>. They do not test for character.</p>
+                </div>
+            </div>
+            <div class="glass-panel p-6 flex flex-col md:flex-row items-center gap-6 border-l-4 border-gold">
+                <i class="fa-solid fa-champagne-glasses text-4xl text-gold w-12 text-center"></i>
+                <div class="text-center md:text-left">
+                    <h3 class="font-bold text-white text-xl mb-1">The Party Startup</h3>
+                    <p class="text-subtext text-base">They sell a fake reality in their <b>want ads</b>. They say "it is a <b>party</b> here every day". Employees quickly discover it feels like a <b>dungeon</b>.</p>
+                </div>
+            </div>
+            <div class="glass-panel p-6 flex flex-col md:flex-row items-center gap-6 border-l-4 border-primary">
+                <i class="fa-solid fa-handshake-angle text-4xl text-primary w-12 text-center"></i>
+                <div class="text-center md:text-left">
+                    <h3 class="font-bold text-white text-xl mb-1">The Honest Company</h3>
+                    <p class="text-subtext text-base">They are <b>brutally honest</b> in interviews. They admit there is <b>stress</b> and dark days, but the <b>camaraderie</b> is incredibly high.</p>
+                </div>
+            </div>
+        </div>
+        <button onclick="closeDossierModal()" class="btn-gold max-w-3xl mx-auto w-full py-4 mt-8 text-lg">CLOSE REVIEW</button>
+    </div>
+
+    <!-- 7. YOUTUBE VIDEO MODAL -->
+    <div id="video-modal" class="absolute inset-0 z-[70] hidden bg-[#060B14]/95 flex-col px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-sm font-header text-primary font-bold uppercase tracking-widest"><i class="fa-solid fa-video mr-2"></i> Lesson Review</h2>
+            <button onclick="closeVideoModal()" class="text-white hover:text-primary text-3xl"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="w-full relative pt-[56.25%] rounded-xl overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.5)] bg-black">
+            <iframe id="yt-iframe" class="absolute top-0 left-0 w-full h-full" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        <p class="text-subtext text-center mt-6 text-sm">Reviewing: "A Better Way to Hire | Simon Sinek"</p>
+    </div>
+
+</div>
+
+<script>
+    /* --- DATA: 20 EXERCISES (B1 ADVANCED) --- */
+    const exercises = [
+        { type: 'options', prompt: "HR Strategy", q: "What should you prioritize when hiring?", opts: ["Skills only", "Character and Fit", "Typing speed"], ans: 1 },
+        { type: 'slot', prompt: "Conditional Check", pre: "If a client complained, what", opts: ["will you do?", "would you do?", "do you do?"], post: "", ans: "would you do?" },
+        { type: 'bug', prompt: "Email Proofreader", q: "I manage a team of 10 people last year.", bugIdx: 1, fix: "managed" },
+        { type: 'builder', prompt: "Syntax Assembly", words: ["want", "You", "to", "get", "a", "sense", "of", "character."], target: "You want to get a sense of character." },
+        { type: 'auth', prompt: "Fact Check", q: "According to Simon Sinek, skills are more important than character.", valid: false },
+        { type: 'options', prompt: "Vocabulary", q: "What does 'great on paper' mean?", opts: ["Having a beautiful resume", "Drawing well", "Writing books"], ans: 0 },
+        { type: 'slot', prompt: "Conditional Check", pre: "If I", opts: ["am", "was", "were"], post: "the CEO, I would change the culture.", ans: "were" },
+        { type: 'bug', prompt: "Email Proofreader", q: "She would helps the team if she had time.", bugIdx: 2, fix: "help" },
+        { type: 'builder', prompt: "Syntax Assembly", words: ["Skills", "can", "be", "taught,", "but", "character", "cannot."], target: "Skills can be taught, but character cannot." },
+        { type: 'auth', prompt: "Fact Check", q: "Taking a candidate out for coffee is a terrible idea.", valid: false },
+        { type: 'options', prompt: "Vocabulary", q: "What is a 'red flag'?", opts: ["A warning sign", "A company logo", "A job ad"], ans: 0 },
+        { type: 'slot', prompt: "Form Selector", pre: "High turnover is usually caused by", opts: ["good culture.", "toxic culture.", "high salaries."], post: "", ans: "toxic culture." },
+        { type: 'bug', prompt: "Email Proofreader", q: "If we hired him, we would improves the team.", bugIdx: 6, fix: "improve" },
+        { type: 'builder', prompt: "Syntax Assembly", words: ["The", "camaraderie", "in", "our", "team", "is", "high."], target: "The camaraderie in our team is high." },
+        { type: 'auth', prompt: "Fact Check", q: "A 'want ad' should hide the stressful parts of the job.", valid: false },
+        { type: 'options', prompt: "Vocabulary", q: "What does 'camaraderie' mean?", opts: ["High salary", "Mutual trust and friendship", "A type of coffee"], ans: 1 },
+        { type: 'slot', prompt: "Form Selector", pre: "We give honest", opts: ["resume", "feedback", "dungeon"], post: "to our employees.", ans: "feedback" },
+        { type: 'bug', prompt: "Email Proofreader", q: "What would you done if you made a mistake?", bugIdx: 3, fix: "do" },
+        { type: 'builder', prompt: "Syntax Assembly", words: ["We", "must", "be", "brutally", "honest", "in", "interviews."], target: "We must be brutally honest in interviews." },
+        { type: 'auth', prompt: "Fact Check", q: "The Party Startup sells a fake reality in their job ads.", valid: true }
+    ];
+
+    /* --- STATE --- */
+    let currentEx = 0;
+    let maxHearts = 5;
+    let hearts = maxHearts;
+    let userAnswer = null;
+    let isSheetOpen = false;
+
+    // Builder Specific State
+    let builderBank = [];
+    let builderDrop = [];
+
+    /* --- INITIALIZATION --- */
+    window.onload = () => {
+        // App starts on Cover Screen
+    };
+
+    function startHomework() {
+        document.getElementById('cover-screen').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('cover-screen').classList.add('hidden');
+            document.getElementById('game-ui').classList.remove('hidden');
+            document.getElementById('game-ui').classList.add('flex');
+            renderExercise();
+        }, 500);
+    }
+
+    const ReviewButton = `<div class="w-full flex justify-end mb-6"><button onclick="openDossierModal()" class="px-4 py-2 bg-[#1E293B] border border-white/10 rounded-full text-xs font-bold text-subtext hover:text-gold hover:border-gold hover:bg-[rgba(212,175,55,0.1)] transition-all flex items-center gap-2 shadow-sm"><i class="fa-solid fa-book-open text-gold"></i> Review Companies</button></div>`;
+
+    /* --- RENDER LOGIC --- */
+    function renderExercise() {
+        const ex = exercises[currentEx];
+        userAnswer = null;
+        document.getElementById('check-btn').disabled = true;
+        
+        // Progress Bar
+        const progress = (currentEx / exercises.length) * 100;
+        document.getElementById('progress-bar').style.width = `${progress}%`;
+        
+        updateHearts();
+
+        const container = document.getElementById('exercise-content');
+        let html = '';
+
+        if (ex.type === 'auth') {
+            html = `
+                ${ReviewButton}
+                <div class="mb-8 text-center">
+                    <span class="bg-gold/20 text-gold px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">${ex.prompt}</span>
+                </div>
+                <div class="glass-panel p-8 text-2xl font-header font-medium text-white mb-10 italic text-center leading-relaxed">
+                    "${ex.q}"
+                </div>
+                <div class="flex justify-center gap-4 mt-auto mb-4">
+                    <button class="opt-btn flex-1 justify-center py-6 flex-col gap-2" onclick="selectAuth(true, this)">
+                        <i class="fa-solid fa-check text-2xl opacity-50 icon-indicator"></i> TRUE
+                    </button>
+                    <button class="opt-btn flex-1 justify-center py-6 flex-col gap-2" onclick="selectAuth(false, this)">
+                        <i class="fa-solid fa-xmark text-2xl opacity-50 icon-indicator"></i> FALSE
+                    </button>
+                </div>
+            `;
+        } else if (ex.type === 'options') {
+            html = `
+                ${ReviewButton}
+                <div class="mb-6 text-center">
+                    <span class="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">${ex.prompt}</span>
+                </div>
+                <h3 class="text-2xl font-header font-bold text-white mb-8 leading-tight text-center">${ex.q}</h3>
+                <div class="flex flex-col gap-3 mt-auto mb-4">
+                    ${ex.opts.map((opt, i) => `
+                        <button class="opt-btn" onclick="selectMCQ(${i}, this)">
+                            <div class="opt-circle"><i class="fa-solid fa-check text-[#060B14] text-xs opacity-0 fa-check-icon"></i></div>
+                            <span>${opt}</span>
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+        } else if (ex.type === 'slot') {
+            html = `
+                ${ReviewButton}
+                <div class="mb-8 text-center">
+                    <span class="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest"><i class="fa-solid fa-square-caret-down mr-2"></i> ${ex.prompt}</span>
+                </div>
+                <div class="glass-panel p-8 text-2xl font-body font-medium flex items-center justify-center gap-3 flex-wrap leading-loose shadow-2xl bg-[#0F172A] border border-white/10">
+                    <span class="text-white relative z-10">${ex.pre}</span>
+                    <button id="slot-btn" class="relative bg-[#060B14] border border-white/20 px-5 py-2 text-gold shadow-xl flex items-center justify-between gap-3 font-bold rounded-xl transition-all" onclick="cycleSlot()" data-opts="${ex.opts.join('|').replace(/"/g, '&quot;')}" data-index="0">
+                        <span>${ex.opts[0]}</span> <i class="fa-solid fa-caret-down text-sm opacity-70"></i>
+                    </button>
+                    ${ex.post ? `<span class="text-white relative z-10">${ex.post}</span>` : ''}
+                </div>
+            `;
+            // Auto-select first option for slot
+            userAnswer = ex.opts[0];
+            document.getElementById('check-btn').disabled = false;
+        } else if (ex.type === 'bug') {
+            html = `
+                ${ReviewButton}
+                <div class="mb-8 text-center">
+                    <span class="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">${ex.prompt}</span>
+                </div>
+                <div class="glass-panel p-0 overflow-hidden text-left border border-white/10 shadow-2xl">
+                    <div class="bg-[#1E293B] px-4 py-3 flex items-center gap-2 border-b border-white/5">
+                        <div class="w-2.5 h-2.5 rounded-full bg-[#E50914]"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-gold"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+                        <span class="ml-3 text-[10px] text-subtext font-medium flex items-center uppercase tracking-widest"><i class="fa-solid fa-envelope mr-2"></i> Draft Check</span>
+                    </div>
+                    <div class="p-8 text-2xl font-body font-medium leading-loose text-white/90 text-center">
+                        ${ex.q.split(' ').map((word, i) => `
+                            <span class="bh-word" id="bh-word-${i}" onclick="selectBug(${i}, this)">${word}</span>
+                        `).join(' ')}
+                    </div>
+                </div>
+            `;
+        } else if (ex.type === 'builder') {
+            html = `
+                ${ReviewButton}
+                <div class="mb-8 text-center">
+                    <span class="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest"><i class="fa-solid fa-layer-group mr-2"></i> ${ex.prompt}</span>
+                </div>
+                <div class="drop-zone" id="builder-drop"></div>
+                <div class="flex flex-wrap gap-2 justify-center mt-auto mb-4 bg-[#0F172A] p-4 rounded-2xl border border-white/5" id="builder-bank"></div>
+            `;
+            // Defer initialization
+            setTimeout(() => initBuilder(ex.words), 0);
+        }
+
+        container.innerHTML = html;
+        
+        // Reset check button
+        const checkBtn = document.getElementById('check-btn');
+        checkBtn.className = "btn-gold w-full py-4 text-lg mt-auto";
+        checkBtn.innerText = "VERIFY STRATEGY";
+    }
+
+    /* --- COMPONENT LOGIC --- */
+    function updateHearts() {
+        const container = document.getElementById('hearts-container');
+        let html = '';
+        for (let i = 0; i < maxHearts; i++) {
+            if (i < hearts) {
+                html += '<i class="fa-solid fa-heart fa-beat text-[#E50914] drop-shadow-[0_0_8px_rgba(229,9,20,0.6)]" style="--fa-animation-duration: 2s;"></i>';
+            } else {
+                html += '<i class="fa-regular fa-heart opacity-30 text-white"></i>';
+            }
+        }
+        container.innerHTML = html;
+    }
+
+    function selectAuth(val, btnEl) {
+        userAnswer = val;
+        document.querySelectorAll('.opt-btn').forEach(b => {
+            b.classList.remove('selected');
+            b.querySelector('.icon-indicator')?.classList.remove('opacity-100', 'text-gold');
+            b.querySelector('.icon-indicator')?.classList.add('opacity-50');
+        });
+        btnEl.classList.add('selected');
+        btnEl.querySelector('.icon-indicator')?.classList.remove('opacity-50');
+        btnEl.querySelector('.icon-indicator')?.classList.add('opacity-100', 'text-gold');
+        document.getElementById('check-btn').disabled = false;
+    }
+
+    function selectMCQ(idx, btnEl) {
+        userAnswer = idx;
+        document.querySelectorAll('.opt-btn').forEach(b => {
+            b.classList.remove('selected');
+            b.querySelector('.fa-check-icon')?.classList.remove('opacity-100');
+            b.querySelector('.fa-check-icon')?.classList.add('opacity-0');
+        });
+        btnEl.classList.add('selected');
+        btnEl.querySelector('.fa-check-icon')?.classList.remove('opacity-0');
+        btnEl.querySelector('.fa-check-icon')?.classList.add('opacity-100');
+        document.getElementById('check-btn').disabled = false;
+    }
+
+    function cycleSlot() {
+        const btn = document.getElementById('slot-btn');
+        const opts = btn.getAttribute('data-opts').split('|');
+        let idx = parseInt(btn.getAttribute('data-index'));
+        idx = (idx + 1) % opts.length;
+        btn.setAttribute('data-index', idx);
+        btn.innerHTML = `<span>${opts[idx]}</span> <i class="fa-solid fa-caret-down text-sm opacity-70"></i>`;
+        
+        // Add visual flair to the button when interacted with
+        btn.classList.add('border-gold', 'bg-[rgba(212,175,55,0.1)]');
+        
+        userAnswer = opts[idx];
+    }
+
+    function selectBug(idx, spanEl) {
+        userAnswer = idx;
+        const container = spanEl.parentElement;
+        container.querySelectorAll('span').forEach(s => {
+            s.classList.remove('selected');
+        });
+        spanEl.classList.add('selected');
+        document.getElementById('check-btn').disabled = false;
+    }
+
+    function initBuilder(words) {
+        builderBank = [...words].sort(() => Math.random() - 0.5);
+        builderDrop = [];
+        renderBuilder();
+    }
+
+    function renderBuilder() {
+        const dropEl = document.getElementById('builder-drop');
+        const bankEl = document.getElementById('builder-bank');
+        if(!dropEl || !bankEl) return;
+
+        dropEl.innerHTML = builderDrop.map((w, i) => `
+            <div class="word-chip selected" onclick="moveToBank('${w.replace(/'/g, "\\'")}', ${i})">${w}</div>
+        `).join('');
+
+        bankEl.innerHTML = builderBank.map((w, i) => `
+            <div class="word-chip hover:border-gold hover:text-gold" onclick="moveToDrop('${w.replace(/'/g, "\\'")}', ${i})"><i class="fa-solid fa-grip-vertical text-subtext/50 mr-2 text-xs"></i>${w}</div>
+        `).join('');
+
+        userAnswer = builderDrop;
+        
+        const ex = exercises[currentEx];
+        document.getElementById('check-btn').disabled = builderDrop.length !== ex.words.length;
+    }
+
+    function moveToDrop(word, index) {
+        builderBank.splice(index, 1);
+        builderDrop.push(word);
+        renderBuilder();
+    }
+
+    function moveToBank(word, index) {
+        builderDrop.splice(index, 1);
+        builderBank.push(word);
+        renderBuilder();
+    }
+
+    /* --- VALIDATION & FEEDBACK --- */
+    function checkAnswer() {
+        if (isSheetOpen) return; // Prevent double clicks
+        
+        const ex = exercises[currentEx];
+        let isCorrect = false;
+        let expectedMsg = "";
+
+        switch(ex.type) {
+            case 'auth':
+                isCorrect = (userAnswer === ex.valid);
+                expectedMsg = ex.valid ? "Yes, it is TRUE." : "No, it is FALSE.";
+                break;
+            case 'options':
+                isCorrect = (userAnswer === ex.ans);
+                expectedMsg = ex.opts[ex.ans];
+                break;
+            case 'slot':
+                isCorrect = (userAnswer === ex.ans);
+                expectedMsg = ex.ans;
+                break;
+            case 'bug':
+                isCorrect = (userAnswer === ex.bugIdx);
+                expectedMsg = "Mistake: " + ex.q.split(' ')[ex.bugIdx] + " ➔ " + ex.fix;
+                break;
+            case 'builder':
+                isCorrect = (userAnswer.join(' ') === ex.target);
+                expectedMsg = ex.target;
+                break;
+        }
+
+        if (isCorrect) {
+            showBottomSheet(true);
+        } else {
+            hearts--;
+            updateHearts();
+            document.getElementById('exercise-content').classList.add('animate-shake');
+            setTimeout(() => document.getElementById('exercise-content').classList.remove('animate-shake'), 400);
+            
+            showBottomSheet(false, expectedMsg);
+            
+            if (hearts <= 0) {
+                setTimeout(showGameOver, 1500); 
+            }
+        }
+    }
+
+    function showBottomSheet(isCorrect, msg = "") {
+        isSheetOpen = true;
+        const sheet = document.getElementById('bottom-sheet');
+        const backdrop = document.getElementById('sheet-backdrop');
+        const title = document.getElementById('sheet-title');
+        const icon = document.getElementById('sheet-icon');
+        const msgContainer = document.getElementById('sheet-msg-container');
+        const msgText = document.getElementById('sheet-msg');
+        const btn = document.getElementById('continue-btn');
+        const checkBtn = document.getElementById('check-btn');
+        
+        checkBtn.disabled = true;
+
+        backdrop.classList.remove('hidden');
+        setTimeout(() => backdrop.classList.remove('opacity-0'), 10);
+
+        if (isCorrect) {
+            sheet.className = "absolute bottom-0 left-0 w-full rounded-t-3xl p-6 pb-10 z-50 transform flex flex-col gap-6 transition-transform duration-300 bg-[#0073C0] text-white translate-y-0";
+            title.innerText = "Excellent!";
+            icon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+            msgContainer.classList.add('hidden');
+            btn.className = "w-full py-4 rounded-xl font-header font-bold text-lg uppercase tracking-wider bg-[#060B14] text-white shadow-[0_4px_0_#000] active:translate-y-1 active:shadow-none transition-all border-none";
+        } else {
+            sheet.className = "absolute bottom-0 left-0 w-full rounded-t-3xl p-6 pb-10 z-50 transform flex flex-col gap-6 transition-transform duration-300 bg-[#E50914] text-white translate-y-0";
+            title.innerText = "Incorrect";
+            icon.innerHTML = '<i class="fa-solid fa-circle-xmark"></i>';
+            msgContainer.classList.remove('hidden');
+            msgText.innerText = msg;
+            btn.className = "w-full py-4 rounded-xl font-header font-bold text-lg uppercase tracking-wider bg-[#060B14] text-white shadow-[0_4px_0_#000] active:translate-y-1 active:shadow-none transition-all border-none";
+        }
+        // Force removal of inline styles that may conflict with Tailwind classes
+        sheet.style.transform = '';
+    }
+
+    function hideBottomSheet() {
+        const sheet = document.getElementById('bottom-sheet');
+        const backdrop = document.getElementById('sheet-backdrop');
+        
+        // Remove the translate-y-0 class and add translate-y-full instead of inline styles
+        sheet.classList.remove('translate-y-0');
+        sheet.classList.add('translate-y-full');
+
+        backdrop.classList.add('opacity-0');
+        
+        setTimeout(() => {
+            backdrop.classList.add('hidden');
+            isSheetOpen = false;
+        }, 300);
+    }
+
+    function nextExercise() {
+        if (hearts <= 0) return; 
+
+        hideBottomSheet();
+        
+        setTimeout(() => {
+            currentEx++;
+            if (currentEx >= exercises.length) {
+                showVictory();
+            } else {
+                renderExercise();
+            }
+        }, 300);
+    }
+
+    /* --- END SCREENS --- */
+    function showGameOver() {
+        const modal = document.getElementById('game-over-modal');
+        document.getElementById('game-ui').classList.add('hidden');
+        document.getElementById('game-ui').classList.remove('flex');
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function showVictory() {
+        const victoryScreen = document.getElementById('victory-screen');
+        document.getElementById('game-ui').classList.add('hidden');
+        document.getElementById('game-ui').classList.remove('flex');
+        
+        document.getElementById('final-hearts').innerText = hearts;
+        
+        victoryScreen.classList.remove('hidden');
+        victoryScreen.classList.add('flex');
+    }
+
+    function openDossierModal() {
+        const modal = document.getElementById('dossier-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeDossierModal() {
+        const modal = document.getElementById('dossier-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    function openVideoModal() {
+        const modal = document.getElementById('video-modal');
+        const iframe = document.getElementById('yt-iframe');
+        iframe.src = "https://www.youtube.com/embed/TulFqmYqEJc?autoplay=1&modestbranding=1&rel=0";
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeVideoModal() {
+        const modal = document.getElementById('video-modal');
+        const iframe = document.getElementById('yt-iframe');
+        iframe.src = "";
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+</script>
+</body>
+</html>
